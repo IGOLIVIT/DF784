@@ -91,95 +91,101 @@ struct OnboardingPage: View {
     @State private var glowAmount: CGFloat = 0.3
     
     var body: some View {
-        VStack(spacing: 40) {
-            Spacer()
-            
-            // Animated icon container
-            ZStack {
-                // Outer glow
-                Circle()
-                    .fill(
-                        RadialGradient(
-                            colors: [
-                                AppColors.primaryAccent.opacity(glowAmount * 0.4),
-                                AppColors.primaryAccent.opacity(glowAmount * 0.1),
-                                Color.clear
-                            ],
-                            center: .center,
-                            startRadius: 40,
-                            endRadius: 120
-                        )
-                    )
-                    .frame(width: 240, height: 240)
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: 40) {
+                Spacer(minLength: 40)
                 
-                // Icon background circle
-                Circle()
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                Color.white.opacity(0.15),
-                                Color.white.opacity(0.05)
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .frame(width: 140, height: 140)
-                    .overlay(
-                        Circle()
-                            .stroke(
-                                LinearGradient(
-                                    colors: [
-                                        AppColors.primaryAccent.opacity(0.5),
-                                        AppColors.secondaryAccent.opacity(0.3)
-                                    ],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                lineWidth: 2
+                // Animated icon container
+                ZStack {
+                    // Outer glow
+                    Circle()
+                        .fill(
+                            RadialGradient(
+                                colors: [
+                                    AppColors.primaryAccent.opacity(glowAmount * 0.4),
+                                    AppColors.primaryAccent.opacity(glowAmount * 0.1),
+                                    Color.clear
+                                ],
+                                center: .center,
+                                startRadius: 40,
+                                endRadius: 120
                             )
-                    )
-                
-                Image(systemName: icon)
-                    .font(.system(size: 60, weight: .light))
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [AppColors.primaryAccent, AppColors.secondaryAccent],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
                         )
-                    )
-                    .scaleEffect(iconScale)
-            }
-            .onAppear {
-                withAnimation(.spring(response: 0.8, dampingFraction: 0.6).delay(0.2)) {
-                    iconScale = 1.0
+                        .frame(width: 240, height: 240)
+                    
+                    // Icon background circle
+                    Circle()
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color.white.opacity(0.15),
+                                    Color.white.opacity(0.05)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 140, height: 140)
+                        .overlay(
+                            Circle()
+                                .stroke(
+                                    LinearGradient(
+                                        colors: [
+                                            AppColors.primaryAccent.opacity(0.5),
+                                            AppColors.secondaryAccent.opacity(0.3)
+                                        ],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                    lineWidth: 2
+                                )
+                        )
+                    
+                    Image(systemName: icon)
+                        .font(.system(size: 60, weight: .light))
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [AppColors.primaryAccent, AppColors.secondaryAccent],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .scaleEffect(iconScale)
                 }
-                withAnimation(.easeInOut(duration: 2).repeatForever(autoreverses: true)) {
-                    glowAmount = 0.6
+                .onAppear {
+                    withAnimation(.spring(response: 0.8, dampingFraction: 0.6).delay(0.2)) {
+                        iconScale = 1.0
+                    }
+                    withAnimation(.easeInOut(duration: 2).repeatForever(autoreverses: true)) {
+                        glowAmount = 0.6
+                    }
                 }
-            }
-            
-            VStack(spacing: 20) {
-                Text(title)
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .foregroundColor(AppColors.softWhite)
-                    .multilineTextAlignment(.center)
-                    .opacity(isVisible ? 1 : 0)
-                    .offset(y: isVisible ? 0 : 20)
                 
-                Text(description)
-                    .font(.system(size: 17, weight: .regular, design: .rounded))
-                    .foregroundColor(AppColors.softWhite.opacity(0.8))
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(4)
-                    .padding(.horizontal, 30)
-                    .opacity(isVisible ? 1 : 0)
-                    .offset(y: isVisible ? 0 : 15)
+                VStack(spacing: 20) {
+                    Text(title)
+                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                        .foregroundColor(AppColors.softWhite)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(nil)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .opacity(isVisible ? 1 : 0)
+                        .offset(y: isVisible ? 0 : 20)
+                    
+                    Text(description)
+                        .font(.system(size: 17, weight: .regular, design: .rounded))
+                        .foregroundColor(AppColors.softWhite.opacity(0.8))
+                        .multilineTextAlignment(.center)
+                        .lineLimit(nil)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .lineSpacing(4)
+                        .padding(.horizontal, 30)
+                        .opacity(isVisible ? 1 : 0)
+                        .offset(y: isVisible ? 0 : 15)
+                }
+                
+                Spacer(minLength: 60)
             }
-            
-            Spacer()
-            Spacer()
+            .frame(maxWidth: .infinity)
         }
         .onAppear {
             withAnimation(.easeOut(duration: 0.6).delay(0.3)) {
