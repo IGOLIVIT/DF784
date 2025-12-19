@@ -170,12 +170,18 @@ class UserProgress: ObservableObject, Codable {
     
     required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        hasCompletedOnboarding = try container.decode(Bool.self, forKey: .hasCompletedOnboarding)
-        gameProgress = try container.decode([GameType: GameProgress].self, forKey: .gameProgress)
-        achievements = try container.decode([Achievement].self, forKey: .achievements)
-        totalGamesPlayed = try container.decode(Int.self, forKey: .totalGamesPlayed)
-        energyLevel = try container.decode(Int.self, forKey: .energyLevel)
-        currentStage = try container.decode(Int.self, forKey: .currentStage)
+        hasCompletedOnboarding = (try? container.decode(Bool.self, forKey: .hasCompletedOnboarding)) ?? false
+        gameProgress = (try? container.decode([GameType: GameProgress].self, forKey: .gameProgress)) ?? {
+            var progress: [GameType: GameProgress] = [:]
+            for gameType in GameType.allCases {
+                progress[gameType] = GameProgress()
+            }
+            return progress
+        }()
+        achievements = (try? container.decode([Achievement].self, forKey: .achievements)) ?? Achievement.all
+        totalGamesPlayed = (try? container.decode(Int.self, forKey: .totalGamesPlayed)) ?? 0
+        energyLevel = (try? container.decode(Int.self, forKey: .energyLevel)) ?? 1
+        currentStage = (try? container.decode(Int.self, forKey: .currentStage)) ?? 1
     }
     
     func encode(to encoder: Encoder) throws {
@@ -329,11 +335,17 @@ class UserProgress: ObservableObject, Codable {
     }
     
     static func load() -> UserProgress {
-        if let data = UserDefaults.standard.data(forKey: saveKey),
-           let decoded = try? JSONDecoder().decode(UserProgress.self, from: data) {
-            return decoded
+        guard let data = UserDefaults.standard.data(forKey: saveKey) else {
+            return UserProgress()
         }
-        return UserProgress()
+        do {
+            let decoded = try JSONDecoder().decode(UserProgress.self, from: data)
+            return decoded
+        } catch {
+            // If decoding fails, clear corrupted data and return fresh instance
+            UserDefaults.standard.removeObject(forKey: saveKey)
+            return UserProgress()
+        }
     }
 }
 

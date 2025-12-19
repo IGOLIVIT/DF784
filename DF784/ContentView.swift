@@ -8,11 +8,20 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject private var userProgress = UserProgress.load()
+    @StateObject private var userProgress: UserProgress
     @State private var isLoading = true
+    @State private var hasAppeared = false
+    
+    init() {
+        _userProgress = StateObject(wrappedValue: UserProgress.load())
+    }
     
     var body: some View {
         ZStack {
+            // Always show background to prevent blank screen
+            AppColors.backgroundGradient
+                .ignoresSafeArea()
+            
             if isLoading {
                 SplashView()
                     .transition(.opacity)
@@ -27,6 +36,9 @@ struct ContentView: View {
         .animation(.easeInOut(duration: 0.5), value: isLoading)
         .animation(.easeInOut(duration: 0.5), value: userProgress.hasCompletedOnboarding)
         .onAppear {
+            guard !hasAppeared else { return }
+            hasAppeared = true
+            
             // Simulate brief loading
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                 withAnimation {
